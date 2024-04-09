@@ -17,11 +17,10 @@ const useStyles = makeStyles(() => ({
 
 export default function TitleBar() {
     const classes = useStyles();
-    const [selectedFile, setSelectedFile] = React.useState<File>(null);
     const [success, setSuccess] = React.useState(false);
     const [failure, setFailure] = React.useState(false);
-    const handleFileUpload = () => {
-        const file = selectedFile;
+    const handleFileUpload = (event: React.ChangeEvent) => {
+        const file = event.target.files[0];
         const formData = new FormData();
         formData.append('file', file, file.name);
         const url: string = 'http://securedatabackend2.us-east-1.elasticbeanstalk.com/api/upload';
@@ -33,35 +32,43 @@ export default function TitleBar() {
         })
             .then(response => {
                 console.log(response);
-                setSelectedFile(null);
                 setSuccess(true);
             })
             .catch(error => {
                 console.error(error);
-                setSelectedFile(null);
                 setFailure(true);
             });
     };
-
-    const handleSelectedFile = (event: React.ChangeEvent) => {
-        setSelectedFile(event.target.files[0]);
+    const handleClick = () => {
         setSuccess(false);
         setFailure(false);
     }
+
     return (
         <AppBar position="fixed" className={classes.appBar}>
             <Toolbar>
                 <Typography variant={"h6"} sx={{my: 2, flex: 1}}>Secure Data Platform</Typography>
-                <TextField type="file" variant={"standard"}
-                           onChange={(event) => handleSelectedFile(event)}/>
-                <Button variant="contained" color="primary" startIcon={<CloudUploadIcon/>}
-                        onClick={handleFileUpload}>Upload</Button>
                 {success && <Tooltip title={"Upload complete"}>
                     <DoneOutlineIcon/>
                 </Tooltip>}
                 {failure && <Tooltip title={"Upload failed"}>
                     <CloseIcon/>
                 </Tooltip>}
+                <input
+                    accept="image/*"
+                    style={{display: 'none'}}
+                    id="raised-button-file"
+                    multiple
+                    type="file"
+                    onClick={handleClick}
+                    onChange={handleFileUpload}
+                />
+                <label htmlFor="raised-button-file">
+                    <Button variant="contained" component="span">
+                        Upload
+                    </Button>
+                </label>
+
             </Toolbar>
         </AppBar>
     );
